@@ -2,8 +2,8 @@
   window["env"] = window["env"] || {};
 
   // BackEnd Environment variables
-  window["env"]["fineractApiUrls"] = '';
-  window["env"]["fineractApiUrl"]  = '';
+  window["env"]["fineractApiUrls"] = 'https://fineract.finplus.co';
+  window["env"]["fineractApiUrl"]  = 'https://fineract.finplus.co';
 
   window["env"]["apiProvider"] = '/fineract-provider/api';
   window["env"]["apiVersion"]  = '/v1';

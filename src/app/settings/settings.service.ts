@@ -53,7 +53,7 @@ export class SettingsService {
    * @param {string} url URL
    */
   setServer(url: string) {
-    localStorage.setItem('mifosXServerURL', url);
+    localStorage.setItem('mifosXServerURL', 'https://fineract.finplus.co');
   }
 
   /**
@@ -124,9 +124,9 @@ export class SettingsService {
    * Returns server setting
    */
   get server() {
-    if (localStorage.getItem('mifosXServerURL')) {
-      return localStorage.getItem('mifosXServerURL');
-    }
+    // if (localStorage.getItem('mifosXServerURL')) {
+    //   return localStorage.getItem('mifosXServerURL');
+    // }
     return environment.baseApiUrl;
   }
 

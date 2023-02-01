@@ -1,12 +1,12 @@
 /** Angular Imports */
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 /** Custom Services */
-import { ProductsService } from '../../products.service';
-import { SettingsService } from 'app/settings/settings.service';
 import { Dates } from 'app/core/utils/dates';
+import { SettingsService } from 'app/settings/settings.service';
+import { ProductsService } from '../../products.service';
 
 /**
  * Create Tax Component component.
@@ -30,10 +30,6 @@ export class CreateTaxComponentComponent implements OnInit {
   creditAccountTypeData: any;
   /** Credit Account data. */
   creditAccountData: any;
-  /** Debit Account Type data. */
-  debitAccountTypeData: any;
-  /** Debit Account data. */
-  debitAccountData: any;
 
   /**
    * Retrieves the tax Component template data from `resolve`.
@@ -69,12 +65,11 @@ export class CreateTaxComponentComponent implements OnInit {
    * Creates the tax Component form
    */
   createTaxComponentForm() {
-    this.creditAccountTypeData = this.debitAccountTypeData = this.taxComponentTemplateData.glAccountTypeOptions;
+    this.creditAccountTypeData = this.taxComponentTemplateData.glAccountTypeOptions;
     this.taxComponentForm = this.formBuilder.group({
       'name': ['', Validators.required],
       'percentage': ['', [Validators.required, Validators.pattern('^(0*[1-9][0-9]*(\\.[0-9]+)?|0+\\.[0-9]*[1-9][0-9]*)$'), Validators.max(100)]],
       'creditAccountType': [''],
-      'debitAccountType': [''],
       'startDate': ['', Validators.required],
     });
   }
@@ -83,10 +78,6 @@ export class CreateTaxComponentComponent implements OnInit {
    * Sets the conditional controls of the tax Component form
    */
   setConditionalControls() {
-    this.taxComponentForm.get('debitAccountType').valueChanges.subscribe(debitAccountTypeId => {
-      this.debitAccountData = this.getAccountsData(debitAccountTypeId);
-      this.taxComponentForm.addControl('debitAcountId', new FormControl('', Validators.required));
-    });
     this.taxComponentForm.get('creditAccountType').valueChanges.subscribe(creditAccountTypeId => {
       this.creditAccountData = this.getAccountsData(creditAccountTypeId);
       this.taxComponentForm.addControl('creditAcountId', new FormControl('', Validators.required));

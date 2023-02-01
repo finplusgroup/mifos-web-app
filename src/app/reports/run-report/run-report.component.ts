@@ -1,16 +1,16 @@
 /** Angular Imports */
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 /** Custom Services */
-import { ReportsService } from '../reports.service';
 import { SettingsService } from 'app/settings/settings.service';
+import { ReportsService } from '../reports.service';
 
 /** Custom Models */
+import { Dates } from 'app/core/utils/dates';
 import { ReportParameter } from '../common-models/report-parameter.model';
 import { SelectOption } from '../common-models/select-option.model';
-import { Dates } from 'app/core/utils/dates';
 
 /**
  * Run report component.
@@ -195,7 +195,7 @@ export class RunReportComponent implements OnInit {
           formattedResponse[newKey] = value['id'];
           break;
         case 'date':
-          const dateFormat = 'yyyy-MM-dd';
+          const dateFormat = 'dd MMMM yyyy';
           formattedResponse[newKey] = this.dateUtils.formatDate(value, dateFormat);
           this.reportUsesDates = true;
           break;

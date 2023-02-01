@@ -8,7 +8,7 @@
     "fineract",
     "angular"
   ],
-  "homepage": "https://github.com/openMF/web-app",
+  "homepage": "https://github.com/rmatovu987/mifos-web-app",
   "license": "MPL-2.0",
   "scripts": {
     "ng": "ng",
@@ -65,7 +65,7 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "13.3.10",
-    "@angular/cli": "13.3.10",
+    "@angular/cli": "^13.3.10",
     "@angular/compiler-cli": "13.3.12",
     "@angular/language-service": "13.3.12",
     "@biesbjerg/ngx-translate-extract": "^7.0.4",
@@ -107,10 +107,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openMF/web-app.git"
+    "url": "https://github.com/rmatovu987/mifos-web-app.git"
   },
   "bugs": {
-    "url": "https://github.com/openMF/web-app/issues"
+    "url": "https://github.com/rmatovu987/mifos-web-app/issues"
   },
   "engines": {
     "node": ">= 16.15.1",

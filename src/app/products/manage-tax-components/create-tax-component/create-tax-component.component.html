@@ -29,27 +29,6 @@
           </mat-form-field>
 
           <mat-form-field>
-            <mat-label>Debit Account Type</mat-label>
-            <mat-select formControlName="debitAccountType">
-              <mat-option *ngFor="let debitAccountType of debitAccountTypeData" [value]="debitAccountType.id">
-                {{ debitAccountType.value }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field *ngIf="taxComponentForm.controls.debitAccountType.value">
-            <mat-label>Debit Account</mat-label>
-            <mat-select required formControlName="debitAcountId">
-              <mat-option *ngFor="let debitAccount of debitAccountData" [value]="debitAccount.id">
-                {{ debitAccount.name }}
-              </mat-option>
-            </mat-select>
-            <mat-error *ngIf="taxComponentForm.controls.debitAcountId.hasError('required')">
-              Debit account is <strong>required</strong>
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field>
             <mat-label>Credit Account Type</mat-label>
             <mat-select formControlName="creditAccountType">
               <mat-option *ngFor="let creditAccountType of creditAccountTypeData" [value]="creditAccountType.id">
