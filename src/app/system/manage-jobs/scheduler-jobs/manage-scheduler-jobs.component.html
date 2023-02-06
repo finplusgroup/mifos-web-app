@@ -53,12 +53,12 @@
 
       <ng-container matColumnDef="nextRunTime">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Next Run </th>
-        <td mat-cell *matCellDef="let job"> {{ job.nextRunTime }} </td>
+        <td mat-cell *matCellDef="let job"> {{ job.nextRunTime  | date: 'dd/MM/yyyy HH:MM' }} </td>
       </ng-container>
 
       <ng-container matColumnDef="previousRunTime">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Previous Run </th>
-        <td mat-cell *matCellDef="let job"><span *ngIf="job.lastRunHistory">{{ job.lastRunHistory.jobRunStartTime
+        <td mat-cell *matCellDef="let job"><span *ngIf="job.lastRunHistory">{{ job.lastRunHistory.jobRunStartTime | date: 'dd/MM/yyyy HH:MM'
             }}</span></td>
       </ng-container>
 
