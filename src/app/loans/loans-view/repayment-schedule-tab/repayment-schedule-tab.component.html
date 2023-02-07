@@ -17,17 +17,20 @@
     <ng-container matColumnDef="date">
       <th mat-header-cell class="center" *matHeaderCellDef> Date </th>
       <td mat-cell class="m-r-5" *matCellDef="let ele" [ngClass]="installmentStyle(ele)"> {{ ele.dueDate  | dateFormat}} </td>
+      <td mat-cell class="m-r-5" *matCellDef="let ele" [ngClass]="installmentStyle(ele)"> {{ ele.dueDate  | dateFormat}} </td>
       <td mat-footer-cell *matFooterCellDef>  </td>
     </ng-container>
 
     <ng-container matColumnDef="paiddate">
       <th mat-header-cell class="center" *matHeaderCellDef> Paid Date </th>
       <td mat-cell class="center" *matCellDef="let ele" [ngClass]="installmentStyle(ele)"> {{ ele.obligationsMetOnDate  | dateFormat}} </td>
+      <td mat-cell class="center" *matCellDef="let ele" [ngClass]="installmentStyle(ele)"> {{ ele.obligationsMetOnDate  | dateFormat}} </td>
       <td mat-footer-cell *matFooterCellDef>  </td>
     </ng-container>
 
     <ng-container matColumnDef="check">
       <th mat-header-cell *matHeaderCellDef> &nbsp; </th>
+      <td mat-cell class="center" *matCellDef="let ele" [ngClass]="installmentStyle(ele)">
       <td mat-cell class="center" *matCellDef="let ele" [ngClass]="installmentStyle(ele)">
         <span *ngIf="ele.obligationsMetOnDate"> <i class="fa fa-check"></i> </span>
       </td>
@@ -36,6 +39,7 @@
 
     <ng-container matColumnDef="balanceOfLoan">
       <th mat-header-cell class="r-amount" *matHeaderCellDef> Balance Of Loan </th>
+      <td mat-cell class="r-amount" *matCellDef="let ele" [ngClass]="installmentStyle(ele)"> {{ ele.principalLoanBalanceOutstanding | number }} </td>
       <td mat-cell class="r-amount" *matCellDef="let ele" [ngClass]="installmentStyle(ele)"> {{ ele.principalLoanBalanceOutstanding | number }} </td>
       <td mat-footer-cell class="r-amount" *matFooterCellDef> &nbsp; </td>
     </ng-container>
