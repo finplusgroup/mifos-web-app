@@ -1,33 +1,32 @@
 /** Angular Imports */
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatTableDataSource, MatTable } from '@angular/material/table';
+import { Component, OnInit, ViewChild } from "@angular/core";
+import { MatDialog } from "@angular/material/dialog";
+import { MatPaginator } from "@angular/material/paginator";
+import { MatSort } from "@angular/material/sort";
+import { MatTableDataSource } from "@angular/material/table";
+import { ActivatedRoute, Router } from "@angular/router";
 
 /** Custom Services */
-import { LoansService } from 'app/loans/loans.service';
-import { SettingsService } from 'app/settings/settings.service';
+import { LoansService } from "app/loans/loans.service";
+import { SettingsService } from "app/settings/settings.service";
 
 /** Custom Dialogs */
-import { FormDialogComponent } from 'app/shared/form-dialog/form-dialog.component';
-import { DeleteDialogComponent } from 'app/shared/delete-dialog/delete-dialog.component';
-import { ConfirmationDialogComponent } from 'app/shared/confirmation-dialog/confirmation-dialog.component';
+import { ConfirmationDialogComponent } from "app/shared/confirmation-dialog/confirmation-dialog.component";
+import { DeleteDialogComponent } from "app/shared/delete-dialog/delete-dialog.component";
+import { FormDialogComponent } from "app/shared/form-dialog/form-dialog.component";
 
 /** Custom Models */
-import { FormfieldBase } from 'app/shared/form-dialog/formfield/model/formfield-base';
-import { InputBase } from 'app/shared/form-dialog/formfield/model/input-base';
-import { DatepickerBase } from 'app/shared/form-dialog/formfield/model/datepicker-base';
-import { Dates } from 'app/core/utils/dates';
+import { Dates } from "app/core/utils/dates";
+import { DatepickerBase } from "app/shared/form-dialog/formfield/model/datepicker-base";
+import { FormfieldBase } from "app/shared/form-dialog/formfield/model/formfield-base";
+import { InputBase } from "app/shared/form-dialog/formfield/model/input-base";
 
 @Component({
-  selector: 'mifosx-charges-tab',
-  templateUrl: './charges-tab.component.html',
-  styleUrls: ['./charges-tab.component.scss']
+  selector: "mifosx-charges-tab",
+  templateUrl: "./charges-tab.component.html",
+  styleUrls: ["./charges-tab.component.scss"],
 })
 export class ChargesTabComponent implements OnInit {
-
   /** Loan Details Data */
   loanDetails: any;
   /** Charges Data */
@@ -49,24 +48,30 @@ export class ChargesTabComponent implements OnInit {
    * @param {ActivatedRoute} route Activated Route.
    * @param {SettingsService} settingsService Settings Service
    */
-  constructor(private loansService: LoansService,
-              private route: ActivatedRoute,
-              private dateUtils: Dates,
-              private router: Router,
-              public dialog: MatDialog,
-              private settingsService: SettingsService) {
-    this.route.parent.data.subscribe(( data: { loanDetailsData: any }) => {
+  constructor(
+    private loansService: LoansService,
+    private route: ActivatedRoute,
+    private dateUtils: Dates,
+    private router: Router,
+    public dialog: MatDialog,
+    private settingsService: SettingsService
+  ) {
+    this.route.parent.data.subscribe((data: { loanDetailsData: any }) => {
       this.loanDetails = data.loanDetailsData;
     });
   }
-
 
   ngOnInit() {
     this.chargesData = this.loanDetails.charges;
     this.status = this.loanDetails.status.value;
     let actionFlag;
     this.chargesData.forEach((element: any) => {
-      if (element.paid || element.waived || element.chargeTimeType.value === 'Disbursement' || this.loanDetails.status.value !== 'Active') {
+      if (
+        element.paid ||
+        element.waived ||
+        element.chargeTimeType.value === "Disbursement" ||
+        this.loanDetails.status.value !== "Active"
+      ) {
         actionFlag = true;
       } else {
         actionFlag = false;
@@ -85,17 +90,17 @@ export class ChargesTabComponent implements OnInit {
   payCharge(chargeId: any) {
     const formfields: FormfieldBase[] = [
       new DatepickerBase({
-        controlName: 'transactionDate',
-        label: 'Payment Date',
-        value: '',
-        type: 'date',
-        required: true
-      })
+        controlName: "transactionDate",
+        label: "Payment Date",
+        value: "",
+        type: "date",
+        required: true,
+      }),
     ];
     const data = {
       title: `Pay Charge ${chargeId}`,
-      layout: { addButtonText: 'Confirm' },
-      formfields: formfields
+      layout: { addButtonText: "Confirm" },
+      formfields: formfields,
     };
     const payChargeDialogRef = this.dialog.open(FormDialogComponent, { data });
     payChargeDialogRef.afterClosed().subscribe((response: any) => {
@@ -106,9 +111,10 @@ export class ChargesTabComponent implements OnInit {
         const dataObject = {
           transactionDate: this.dateUtils.formatDate(prevTransactionDate, dateFormat),
           dateFormat,
-          locale
+          locale,
         };
-        this.loansService.executeLoansAccountChargesCommand(this.loanDetails.id, 'pay', dataObject, chargeId)
+        this.loansService
+          .executeLoansAccountChargesCommand(this.loanDetails.id, "pay", dataObject, chargeId)
           .subscribe(() => {
             this.reload();
           });
@@ -121,10 +127,17 @@ export class ChargesTabComponent implements OnInit {
    * @param {any} chargeId Charge Id
    */
   waiveCharge(chargeId: any) {
-    const waiveChargeDialogRef = this.dialog.open(ConfirmationDialogComponent, { data: { heading: 'Waive Charge', dialogContext: `Are you sure you want to waive charge with id: ${chargeId}`, type: 'Basic' } });
+    const waiveChargeDialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        heading: "Waive Charge",
+        dialogContext: `Are you sure you want to waive charge with id: ${chargeId}`,
+        type: "Basic",
+      },
+    });
     waiveChargeDialogRef.afterClosed().subscribe((response: any) => {
       if (response.confirm) {
-        this.loansService.executeLoansAccountChargesCommand(this.loanDetails.id, 'waive', {}, chargeId)
+        this.loansService
+          .executeLoansAccountChargesCommand(this.loanDetails.id, "waive", {}, chargeId)
           .subscribe(() => {
             this.reload();
           });
@@ -139,17 +152,17 @@ export class ChargesTabComponent implements OnInit {
   editCharge(charge: any) {
     const formfields: FormfieldBase[] = [
       new InputBase({
-        controlName: 'amount',
-        label: 'Amount',
+        controlName: "amount",
+        label: "Amount",
         value: charge.amount || charge.amountOrPercentage,
-        type: 'number',
-        required: true
-      })
+        type: "number",
+        required: true,
+      }),
     ];
     const data = {
       title: `Edit Charge ${charge.id}`,
-      layout: { addButtonText: 'Confirm' },
-      formfields: formfields
+      layout: { addButtonText: "Confirm" },
+      formfields: formfields,
     };
     const editChargeDialogRef = this.dialog.open(FormDialogComponent, { data });
     editChargeDialogRef.afterClosed().subscribe((response: any) => {
@@ -159,12 +172,11 @@ export class ChargesTabComponent implements OnInit {
         const dataObject = {
           ...response.data.value,
           dateFormat,
-          locale
+          locale,
         };
-        this.loansService.editLoansAccountCharge(this.loanDetails.id, dataObject, charge.id)
-          .subscribe(() => {
-            this.reload();
-          });
+        this.loansService.editLoansAccountCharge(this.loanDetails.id, dataObject, charge.id).subscribe(() => {
+          this.reload();
+        });
       }
     });
   }
@@ -175,14 +187,13 @@ export class ChargesTabComponent implements OnInit {
    */
   deleteCharge(chargeId: any) {
     const deleteChargeDialogRef = this.dialog.open(DeleteDialogComponent, {
-      data: { deleteContext: `charge id:${chargeId}` }
+      data: { deleteContext: `charge id:${chargeId}` },
     });
     deleteChargeDialogRef.afterClosed().subscribe((response: any) => {
       if (response.delete) {
-        this.loansService.deleteLoansAccountCharge(this.loanDetails.id, chargeId)
-          .subscribe(() => {
-            this.reload();
-          });
+        this.loansService.deleteLoansAccountCharge(this.loanDetails.id, chargeId).subscribe(() => {
+          this.reload();
+        });
       }
     });
   }
@@ -201,9 +212,15 @@ export class ChargesTabComponent implements OnInit {
    */
   private reload() {
     const clientId = this.loanDetails.clientId;
+    const groupId = this.loanDetails.group.id;
     const url: string = this.router.url;
-    this.router.navigateByUrl(`/clients/${clientId}/loans-accounts`, { skipLocationChange: true })
-      .then(() => this.router.navigate([url]));
-  }
 
+    if (clientId) {
+      this.router
+        .navigateByUrl(`/clients/${clientId}/loans-accounts`, { skipLocationChange: true })
+        .then(() => this.router.navigate([url]));
+    } else {
+      this.router.navigateByUrl(`/groups/${groupId}/loans-accounts`, { skipLocationChange: true }).then(() => this.router.navigate([url]));
+    }
+  }
 }
