@@ -42,6 +42,8 @@ export class LoansViewComponent implements OnInit {
   loanDetailsDataRepaymentSchedule: any = [];
   /**Today's schedule */
   schedule: any;
+ /**Current balance */
+ currentBalance: number;
 
   loanStatus: LoanStatus;
 
@@ -57,12 +59,15 @@ export class LoansViewComponent implements OnInit {
       this.loanDatatables = data.loanDatatables;
       this.loanStatus = this.loanDetailsData.status;
       this.loanDetailsDataRepaymentSchedule = data.loanDetailsData ? data.loanDetailsData.repaymentSchedule : [];
+      this.currentBalance = this.loanDetailsData.summary.principalOutstanding+this.loanDetailsData.summary.interestOverdue;
       if (this.loanDetailsDataRepaymentSchedule) {
         this.schedule = data.loanDetailsData.repaymentSchedule.periods.filter((d: { dueDate: any }) =>
           this.checkToday(d.dueDate)
         ).shift();
-        console.log(this.schedule);
+        this.currentBalance = this.currentBalance+this.schedule.interestDue;
       }
+
+
     });
     this.loanId = this.route.snapshot.params["loanId"];
     this.clientId = this.loanDetailsData.clientId;
