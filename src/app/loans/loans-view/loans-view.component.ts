@@ -1,26 +1,26 @@
 /** Angular Imports */
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
+import { Component, OnInit } from "@angular/core";
+import { MatDialog } from "@angular/material/dialog";
+import { ActivatedRoute, Router } from "@angular/router";
 
 /** Custom Services */
-import { LoansService } from '../loans.service';
+import { LoansService } from "../loans.service";
 
 /** Custom Buttons Configuration */
-import { LoansAccountButtonConfiguration } from './loan-accounts-button-config';
+import { LoansAccountButtonConfiguration } from "./loan-accounts-button-config";
 
 /** Dialog Components */
-import { ConfirmationDialogComponent } from '../../shared/confirmation-dialog/confirmation-dialog.component';
-import { DeleteDialogComponent } from 'app/shared/delete-dialog/delete-dialog.component';
-import { LoanStatus } from '../models/loan-status.nodel';
+import { DatePipe } from "@angular/common";
+import { DeleteDialogComponent } from "app/shared/delete-dialog/delete-dialog.component";
+import { ConfirmationDialogComponent } from "../../shared/confirmation-dialog/confirmation-dialog.component";
+import { LoanStatus } from "../models/loan-status.nodel";
 
 @Component({
-  selector: 'mifosx-loans-view',
-  templateUrl: './loans-view.component.html',
-  styleUrls: ['./loans-view.component.scss']
+  selector: "mifosx-loans-view",
+  templateUrl: "./loans-view.component.html",
+  styleUrls: ["./loans-view.component.scss"],
 })
 export class LoansViewComponent implements OnInit {
-
   /** Loan Details Data */
   loanDetailsData: any;
   /** Loan Datatables */
@@ -38,20 +38,40 @@ export class LoansViewComponent implements OnInit {
   buttonConfig: LoansAccountButtonConfiguration;
   /** Disburse Transaction number */
   disburseTransactionNo = 0;
+  /**Loan repayment schedules */
+  loanDetailsDataRepaymentSchedule: any = [];
+  /**Today's schedule */
+  schedule: any;
 
   loanStatus: LoanStatus;
 
-  constructor(private route: ActivatedRoute,
-              private router: Router,
-              public loansService: LoansService,
-              public dialog: MatDialog) {
-    this.route.data.subscribe((data: { loanDetailsData: any, loanDatatables: any}) => {
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    public loansService: LoansService,
+    public dialog: MatDialog,
+    private datePipe: DatePipe
+  ) {
+    this.route.data.subscribe((data: { loanDetailsData: any; loanDatatables: any }) => {
       this.loanDetailsData = data.loanDetailsData;
       this.loanDatatables = data.loanDatatables;
       this.loanStatus = this.loanDetailsData.status;
+      this.loanDetailsDataRepaymentSchedule = data.loanDetailsData ? data.loanDetailsData.repaymentSchedule : [];
+      if (this.loanDetailsDataRepaymentSchedule) {
+        this.schedule = data.loanDetailsData.repaymentSchedule.periods.filter((d: { dueDate: any }) =>
+          this.checkToday(d.dueDate)
+        ).shift();
+        console.log(this.schedule);
+      }
     });
-    this.loanId = this.route.snapshot.params['loanId'];
+    this.loanId = this.route.snapshot.params["loanId"];
     this.clientId = this.loanDetailsData.clientId;
+  }
+
+  checkToday(date: any) {
+    let d = this.datePipe.transform(date, "yyyy-MM-dd");
+    let today = this.datePipe.transform(new Date(), "yyyy-MM-dd");
+    return d == today;
   }
 
   ngOnInit() {
@@ -67,12 +87,12 @@ export class LoansViewComponent implements OnInit {
       }
     }
     this.setConditionalButtons();
-    if (this.router.url.includes('clients')) {
-      this.entityType = 'Client';
-    } else if (this.router.url.includes('groups')) {
-      this.entityType = 'Group';
-    } else if (this.router.url.includes('centers')) {
-      this.entityType = 'Center';
+    if (this.router.url.includes("clients")) {
+      this.entityType = "Client";
+    } else if (this.router.url.includes("groups")) {
+      this.entityType = "Group";
+    } else if (this.router.url.includes("centers")) {
+      this.entityType = "Center";
     }
   }
 
@@ -80,90 +100,88 @@ export class LoansViewComponent implements OnInit {
   setConditionalButtons() {
     this.buttonConfig = new LoansAccountButtonConfiguration(this.status);
 
-    if (this.status === 'Submitted and pending approval') {
-
+    if (this.status === "Submitted and pending approval") {
       this.buttonConfig.addOption({
-        name: (this.loanDetailsData.loanOfficerName ? 'Change Loan Officer' : 'Assign Loan Officer'),
-        icon: 'user-tie',
-        taskPermissionName: 'DISBURSE_LOAN'
+        name: this.loanDetailsData.loanOfficerName ? "Change Loan Officer" : "Assign Loan Officer",
+        icon: "user-tie",
+        taskPermissionName: "DISBURSE_LOAN",
       });
 
       if (this.loanDetailsData.isVariableInstallmentsAllowed) {
         this.buttonConfig.addOption({
-          name: 'Edit Repayment Schedule',
-          icon: 'edit',
-          taskPermissionName: 'ADJUST_REPAYMENT_SCHEDULE'
+          name: "Edit Repayment Schedule",
+          icon: "edit",
+          taskPermissionName: "ADJUST_REPAYMENT_SCHEDULE",
         });
       }
-
-    } else if (this.status === 'Approved') {
-
+    } else if (this.status === "Approved") {
       this.buttonConfig.addButton({
-        name: (this.loanDetailsData.loanOfficerName ? 'Change Loan Officer' : 'Assign Loan Officer'),
-        icon: 'user-tie',
-        taskPermissionName: 'DISBURSE_LOAN'
+        name: this.loanDetailsData.loanOfficerName ? "Change Loan Officer" : "Assign Loan Officer",
+        icon: "user-tie",
+        taskPermissionName: "DISBURSE_LOAN",
       });
-
-    } else if (this.status === 'Active') {
+    } else if (this.status === "Active") {
       if (this.loanDetailsData.canDisburse || this.loanDetailsData.multiDisburseLoan) {
         this.buttonConfig.addButton({
-          name: 'Disburse',
-          icon: 'hand-holding-usd',
-          taskPermissionName: 'DISBURSE_LOAN'
+          name: "Disburse",
+          icon: "hand-holding-usd",
+          taskPermissionName: "DISBURSE_LOAN",
         });
       }
       if (this.loanDetailsData.canDisburse) {
         this.buttonConfig.addButton({
-          name: 'Disburse to Savings',
-          icon: 'piggy-bank',
-          taskPermissionName: 'DISBURSETOSAVINGS_LOAN'
+          name: "Disburse to Savings",
+          icon: "piggy-bank",
+          taskPermissionName: "DISBURSETOSAVINGS_LOAN",
         });
       }
       if (this.loanDetailsData.multiDisburseLoan && this.disburseTransactionNo > 1) {
         this.buttonConfig.addButton({
-          name: 'Undo Last Disbursal',
-          icon: 'undo',
-          taskPermissionName: 'DISBURSALLASTUNDO_LOAN'
+          name: "Undo Last Disbursal",
+          icon: "undo",
+          taskPermissionName: "DISBURSALLASTUNDO_LOAN",
         });
       }
       // loan officer not assigned to loan, below logic
       // helps to display otherwise not
       if (!this.loanDetailsData.loanOfficerName) {
         this.buttonConfig.addButton({
-          name: 'Assign Loan Officer',
-          icon: 'user-tie',
-          taskPermissionName: 'UPDATELOANOFFICER_LOAN'
+          name: "Assign Loan Officer",
+          icon: "user-tie",
+          taskPermissionName: "UPDATELOANOFFICER_LOAN",
         });
       }
 
       if (this.recalculateInterest) {
         this.buttonConfig.addButton({
-          name: 'Prepay Loan',
-          icon: 'coins',
-          taskPermissionName: 'REPAYMENT_LOAN'
+          name: "Prepay Loan",
+          icon: "coins",
+          taskPermissionName: "REPAYMENT_LOAN",
         });
       }
-
     }
   }
 
   loanAction(button: string) {
     switch (button) {
-      case 'Recover From Guarantor':
+      case "Recover From Guarantor":
         this.recoverFromGuarantor();
         break;
-      case 'Delete':
+      case "Delete":
         this.deleteLoanAccount();
         break;
-      case 'Modify Application':
-        this.router.navigate(['edit-loans-account'], { relativeTo: this.route});
+      case "Modify Application":
+        this.router.navigate(["edit-loans-account"], { relativeTo: this.route });
         break;
-      case 'Transfer Funds':
-        const queryParams: any = { loanId: this.loanId, accountType: 'fromloans' };
-        this.router.navigate(['transfer-funds/make-account-transfer'], { relativeTo: this.route, queryParams: queryParams });
+      case "Transfer Funds":
+        const queryParams: any = { loanId: this.loanId, accountType: "fromloans" };
+        this.router.navigate(["transfer-funds/make-account-transfer"], {
+          relativeTo: this.route,
+          queryParams: queryParams,
+        });
         break;
       default:
-        this.router.navigate(['actions', button], { relativeTo: this.route });
+        this.router.navigate(["actions", button], { relativeTo: this.route });
         break;
     }
   }
@@ -173,11 +191,15 @@ export class LoansViewComponent implements OnInit {
    */
   private recoverFromGuarantor() {
     const recoverFromGuarantorDialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { heading: 'Recover from Guarantor', dialogContext: 'Are you sure you want recover from Guarantor', type: 'Mild' }
+      data: {
+        heading: "Recover from Guarantor",
+        dialogContext: "Are you sure you want recover from Guarantor",
+        type: "Mild",
+      },
     });
     recoverFromGuarantorDialogRef.afterClosed().subscribe((response: any) => {
       if (response.confirm) {
-        this.loansService.loanActionButtons(this.loanId, 'recoverGuarantees').subscribe(() => {
+        this.loansService.loanActionButtons(this.loanId, "recoverGuarantees").subscribe(() => {
           this.reload();
         });
       }
@@ -189,12 +211,12 @@ export class LoansViewComponent implements OnInit {
    */
   private deleteLoanAccount() {
     const deleteGuarantorDialogRef = this.dialog.open(DeleteDialogComponent, {
-      data: { deleteContext: `with loan id: ${this.loanId}` }
+      data: { deleteContext: `with loan id: ${this.loanId}` },
     });
     deleteGuarantorDialogRef.afterClosed().subscribe((response: any) => {
       if (response.delete) {
         this.loansService.deleteLoanAccount(this.loanId).subscribe(() => {
-          this.router.navigate(['../../'], { relativeTo: this.route });
+          this.router.navigate(["../../"], { relativeTo: this.route });
         });
       }
     });
@@ -207,8 +229,8 @@ export class LoansViewComponent implements OnInit {
   private reload() {
     const clientId = this.clientId;
     const url: string = this.router.url;
-    this.router.navigateByUrl(`/clients/${clientId}/loans-accounts`, { skipLocationChange: true })
+    this.router
+      .navigateByUrl(`/clients/${clientId}/loans-accounts`, { skipLocationChange: true })
       .then(() => this.router.navigate([url]));
   }
-
 }

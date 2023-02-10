@@ -1,34 +1,35 @@
 /** Angular Imports */
-import { Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 
 /** Custom Services */
-import { LoansService } from '../loans.service';
-import { SettingsService } from 'app/settings/settings.service';
-import { ClientsService } from 'app/clients/clients.service';
+import { ClientsService } from "app/clients/clients.service";
+import { SettingsService } from "app/settings/settings.service";
+import { LoansService } from "../loans.service";
 
 /** Step Components */
-import { LoansAccountDetailsStepComponent } from '../loans-account-stepper/loans-account-details-step/loans-account-details-step.component';
-import { LoansAccountTermsStepComponent } from '../loans-account-stepper/loans-account-terms-step/loans-account-terms-step.component';
-import { LoansAccountChargesStepComponent } from '../loans-account-stepper/loans-account-charges-step/loans-account-charges-step.component';
-import { LoansAccountDatatableStepComponent } from '../loans-account-stepper/loans-account-datatable-step/loans-account-datatable-step.component';
+import { LoansAccountChargesStepComponent } from "../loans-account-stepper/loans-account-charges-step/loans-account-charges-step.component";
+import { LoansAccountDatatableStepComponent } from "../loans-account-stepper/loans-account-datatable-step/loans-account-datatable-step.component";
+import { LoansAccountDetailsStepComponent } from "../loans-account-stepper/loans-account-details-step/loans-account-details-step.component";
+import { LoansAccountTermsStepComponent } from "../loans-account-stepper/loans-account-terms-step/loans-account-terms-step.component";
 
 /**
  * Create loans account
  */
 @Component({
-  selector: 'mifosx-create-loans-account',
-  templateUrl: './create-loans-account.component.html',
-  styleUrls: ['./create-loans-account.component.scss']
+  selector: "mifosx-create-loans-account",
+  templateUrl: "./create-loans-account.component.html",
+  styleUrls: ["./create-loans-account.component.scss"],
 })
 export class CreateLoansAccountComponent implements OnInit {
-
   /** Imports all the step component */
-  @ViewChild(LoansAccountDetailsStepComponent, { static: true }) loansAccountDetailsStep: LoansAccountDetailsStepComponent;
+  @ViewChild(LoansAccountDetailsStepComponent, { static: true })
+  loansAccountDetailsStep: LoansAccountDetailsStepComponent;
   @ViewChild(LoansAccountTermsStepComponent, { static: true }) loansAccountTermsStep: LoansAccountTermsStepComponent;
-  @ViewChild(LoansAccountChargesStepComponent, { static: true }) loansAccountChargesStep: LoansAccountChargesStepComponent;
+  @ViewChild(LoansAccountChargesStepComponent, { static: true })
+  loansAccountChargesStep: LoansAccountChargesStepComponent;
   /** Get handle on dtloan tags in the template */
-  @ViewChildren('dtloan') loanDatatables: QueryList<LoansAccountDatatableStepComponent>;
+  @ViewChildren("dtloan") loanDatatables: QueryList<LoansAccountDatatableStepComponent>;
 
   /** Loans Account Template */
   loansAccountTemplate: any;
@@ -50,7 +51,8 @@ export class CreateLoansAccountComponent implements OnInit {
    * @param {SettingsService} settingsService Settings Service
    * @param {ClientsService} clientService Client Service
    */
-  constructor(private route: ActivatedRoute,
+  constructor(
+    private route: ActivatedRoute,
     private router: Router,
     private loansService: LoansService,
     private settingsService: SettingsService,
@@ -61,8 +63,7 @@ export class CreateLoansAccountComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   /**
    * Sets loans account product template and collateral template
@@ -71,11 +72,15 @@ export class CreateLoansAccountComponent implements OnInit {
   setTemplate($event: any) {
     this.loansAccountProductTemplate = $event;
     const clientId = this.loansAccountTemplate.clientId;
-    this.clientService.getCollateralTemplate(clientId).subscribe((response: any) => {
-      this.collateralOptions = response;
-    });
-    const entityId = (this.loansAccountTemplate.clientId) ? this.loansAccountTemplate.clientId : this.loansAccountTemplate.group.id;
-    const isGroup = (this.loansAccountTemplate.clientId) ? false : true;
+    if (clientId) {
+      this.clientService.getCollateralTemplate(clientId).subscribe((response: any) => {
+        this.collateralOptions = response;
+      });
+    }
+    const entityId = this.loansAccountTemplate.clientId
+      ? this.loansAccountTemplate.clientId
+      : this.loansAccountTemplate.group.id;
+    const isGroup = this.loansAccountTemplate.clientId ? false : true;
     const productId = this.loansAccountProductTemplate.loanProductId;
     this.loansService.getLoansAccountTemplateResource(entityId, isGroup, productId).subscribe((response: any) => {
       this.multiDisburseLoan = response.multiDisburseLoan;
@@ -105,10 +110,7 @@ export class CreateLoansAccountComponent implements OnInit {
 
   /** Checks wheter all the forms in different steps are valid or not */
   get loansAccountFormValid() {
-    return (
-      this.loansAccountDetailsForm.valid &&
-      this.loansAccountTermsForm.valid
-    );
+    return this.loansAccountDetailsForm.valid && this.loansAccountTermsForm.valid;
   }
 
   /** Gets principal Amount */
@@ -123,7 +125,7 @@ export class CreateLoansAccountComponent implements OnInit {
       ...this.loansAccountTermsStep.loansAccountTerms,
       ...this.loansAccountChargesStep.loansAccountCharges,
       ...this.loansAccountTermsStep.loanCollateral,
-      ...this.loansAccountTermsStep.disbursementData
+      ...this.loansAccountTermsStep.disbursementData,
     };
   }
 
@@ -133,20 +135,24 @@ export class CreateLoansAccountComponent implements OnInit {
   submit() {
     const locale = this.settingsService.language.code;
     const dateFormat = this.settingsService.dateFormat;
-    const payload = this.loansService.buildLoanRequestPayload(this.loansAccount, this.loansAccountTemplate,
-      this.loansAccountProductTemplate.calendarOptions, locale, dateFormat);
+    const payload = this.loansService.buildLoanRequestPayload(
+      this.loansAccount,
+      this.loansAccountTemplate,
+      this.loansAccountProductTemplate.calendarOptions,
+      locale,
+      dateFormat
+    );
 
     if (this.loansAccountProductTemplate.datatables && this.loansAccountProductTemplate.datatables.length > 0) {
       const datatables: any[] = [];
       this.loanDatatables.forEach((loanDatatable: LoansAccountDatatableStepComponent) => {
         datatables.push(loanDatatable.payload);
       });
-      payload['datatables'] = datatables;
+      payload["datatables"] = datatables;
     }
 
     this.loansService.createLoansAccount(payload).subscribe((response: any) => {
-      this.router.navigate(['../', response.resourceId, 'general'], { relativeTo: this.route });
+      this.router.navigate(["../", response.resourceId, "general"], { relativeTo: this.route });
     });
   }
-
 }
