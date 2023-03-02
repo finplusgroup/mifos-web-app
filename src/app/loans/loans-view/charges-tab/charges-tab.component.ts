@@ -84,6 +84,14 @@ export class ChargesTabComponent implements OnInit {
   }
 
   /**
+   * Asjust the Loan charge.
+   * @param {any} chargeId Charge Id
+   */
+  adjustCharge(chargeId: string) {
+    this.router.navigate([`${chargeId}/adjustment`], { relativeTo: this.route });
+  }
+
+  /**
    * Pays the charge.
    * @param {any} chargeId Charge Id
    */
