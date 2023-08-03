@@ -11,6 +11,8 @@ import { SettingsService } from 'app/settings/settings.service';
 import { ReportParameter } from '../common-models/report-parameter.model';
 import { SelectOption } from '../common-models/select-option.model';
 import { Dates } from 'app/core/utils/dates';
+import { GlobalConfiguration } from 'app/system/configurations/global-configurations-tab/configuration.model';
+import { ProgressBarService } from 'app/core/progress-bar/progress-bar.service';
 
 /**
  * Run report component.
@@ -53,6 +55,10 @@ export class RunReportComponent implements OnInit {
   hidePentaho = true;
   /** Report uses dates */
   reportUsesDates = false;
+  exportToS3Allowed = false;
+  reportToBeExportedInRepository: any;
+  exportToS3Repository: string;
+  outputTypeOptions: any[] = [];
 
   /**
    * Fetches report specifications from route params and retrieves report parameters data from `resolve`.
@@ -63,23 +69,40 @@ export class RunReportComponent implements OnInit {
    */
   constructor(private route: ActivatedRoute,
               private reportsService: ReportsService,
-               private settingsService: SettingsService,
-              private dateUtils: Dates) {
+              private settingsService: SettingsService,
+              private dateUtils: Dates,
+              private progressBarService: ProgressBarService) {
     this.report.name = this.route.snapshot.params['name'];
     this.route.queryParams.subscribe((queryParams: { type: any, id: any }) => {
       this.report.type = queryParams.type;
       this.report.id = queryParams.id;
     });
-    this.route.data.subscribe((data: { reportParameters: ReportParameter[] }) => {
+    this.route.data.subscribe((data: { reportParameters: ReportParameter[], configurations: any }) => {
       this.paramData = data.reportParameters;
+      if (this.isTableReport()) {
+        data.configurations.globalConfiguration.forEach((config: GlobalConfiguration) => {
+          if (config.name === 'report-export-s3-folder-name') {
+            this.exportToS3Allowed = config.enabled;
+            this.exportToS3Repository = config.stringValue;
+          }
+        });
+      }
     });
+  }
+
+  isTableReport(): boolean {
+    return (this.report.type === 'Table');
+  }
+
+  isPentahoReport(): boolean {
+    return (this.report.type === 'Pentaho');
   }
 
   /**
    * Creates and sets the run report form.
    */
   ngOnInit() {
-    this.maxDate = this.settingsService.businessDate;
+    this.maxDate = this.settingsService.maxAllowedDate;
     this.createRunReportForm();
   }
 
@@ -102,9 +125,19 @@ export class RunReportComponent implements OnInit {
           this.updateParentParameters(parent);
         }
       });
-    if (this.report.type === 'Pentaho') {
-      this.reportForm.addControl('outputType', new FormControl(''));
+    if (this.isPentahoReport()) {
+      this.reportForm.addControl('outputType', new FormControl('', Validators.required));
+      this.outputTypeOptions = [
+        { 'name': 'PDF format', 'value': 'PDF' },
+        { 'name': 'Normal format', 'value': 'HTML' },
+        { 'name': 'Excel format', 'value': 'XLS' },
+        { 'name': 'Excel 2007 format', 'value': 'XLSX' },
+        { 'name': 'CSV format', 'value': 'CSV' }
+      ];
       this.mapPentahoParams();
+    }
+    if (this.exportToS3Allowed) {
+      this.reportForm.addControl('exportOutputToS3', new FormControl(false));
     }
     this.decimalChoice.patchValue('0');
     this.setChildControls();
@@ -179,14 +212,19 @@ export class RunReportComponent implements OnInit {
   formatUserResponse(response: any) {
     const formattedResponse: any = {};
     let newKey: string;
+    this.reportToBeExportedInRepository = false;
     for (const [key, value] of Object.entries(response)) {
       if (key === 'outputType') {
         formattedResponse['output-type'] = value;
         continue;
+      } else if (key === 'exportOutputToS3') {
+        this.reportToBeExportedInRepository = value;
+        continue;
       }
+
       const param: ReportParameter = this.paramData
         .find((_entry: any) => _entry.name === key);
-      newKey = this.report.type === 'Pentaho' ? param.pentahoName : param.inputName;
+      newKey = this.isPentahoReport() ? param.pentahoName : param.inputName;
       switch (param.displayType) {
         case 'text':
           formattedResponse[newKey] = value;
@@ -195,8 +233,7 @@ export class RunReportComponent implements OnInit {
           formattedResponse[newKey] = value['id'];
           break;
         case 'date':
-          const dateFormat = 'yyyy-MM-dd';
-          formattedResponse[newKey] = this.dateUtils.formatDate(value, dateFormat);
+          formattedResponse[newKey] = this.dateUtils.formatDate(value, this.settingsService.dateFormat);
           this.reportUsesDates = true;
           break;
         case 'none':
@@ -222,6 +259,9 @@ export class RunReportComponent implements OnInit {
         locale: this.settingsService.language.code,
         dateFormat: this.settingsService.dateFormat
       };
+    }
+    if (this.reportToBeExportedInRepository) {
+      formData['exportS3'] = true;
     }
     this.dataObject = {
       formData: formData,

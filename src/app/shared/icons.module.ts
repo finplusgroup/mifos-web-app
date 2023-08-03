@@ -28,6 +28,7 @@ import {
   faCog,
   faCogs,
   faCommentAlt,
+  faCopy,
   faDollarSign,
   faEdit,
   faEnvelope,
@@ -102,7 +103,9 @@ import {
   faInfo,
   faTasks,
   faCoins,
-  faPiggyBank
+  faPiggyBank,
+  faFileExcel,
+  faFileExport
 } from '@fortawesome/free-solid-svg-icons';
 
 /**
@@ -141,6 +144,7 @@ export class IconsModule {
       faCog,
       faCogs,
       faCommentAlt,
+      faCopy,
       faDollarSign,
       faEdit,
       faEnvelope,
@@ -152,6 +156,8 @@ export class IconsModule {
       faFileAlt,
       faFileUpload,
       faFileWord,
+      faFileExcel,
+      faFileExport,
       faFillDrip,
       faHandHoldingUsd,
       faHome,

@@ -37,6 +37,10 @@ import { DatatableSingleRowComponent } from './tabs/entity-datatable-tab/datatab
 import { DatatableMultiRowComponent } from './tabs/entity-datatable-tab/datatable-multi-row/datatable-multi-row.component';
 import { SvgIconComponent } from './svg-icon/svg-icon.component';
 import { NgxMatDatetimePickerModule, NgxMatNativeDateModule } from '@angular-material-components/datetime-picker';
+import { ViewJournalEntryComponent } from './accounting/view-journal-entry/view-journal-entry.component';
+import { ViewJournalEntryTransactionComponent } from './accounting/view-journal-entry-transaction/view-journal-entry-transaction.component';
+import { AccountNumberComponent } from './account-number/account-number.component';
+import { EntityNameComponent } from './entity-name/entity-name.component';
 
 /**
  * Shared Module
@@ -80,7 +84,11 @@ import { NgxMatDatetimePickerModule, NgxMatNativeDateModule } from '@angular-mat
     EntityDatatableTabComponent,
     DatatableSingleRowComponent,
     DatatableMultiRowComponent,
-    SvgIconComponent
+    SvgIconComponent,
+    ViewJournalEntryComponent,
+    ViewJournalEntryTransactionComponent,
+    AccountNumberComponent,
+    EntityNameComponent
   ],
   exports: [
     FileUploadComponent,
@@ -99,10 +107,14 @@ import { NgxMatDatetimePickerModule, NgxMatNativeDateModule } from '@angular-mat
     TranslateModule,
     TenantSelectorComponent,
     ExternalIdentifierComponent,
+    AccountNumberComponent,
     EntityNotesTabComponent,
     EntityDocumentsTabComponent,
     EntityDatatableTabComponent,
-    SvgIconComponent
+    ViewJournalEntryComponent,
+    ViewJournalEntryTransactionComponent,
+    SvgIconComponent,
+    EntityNameComponent
   ]
 })
 export class SharedModule { }

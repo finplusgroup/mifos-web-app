@@ -1,5 +1,5 @@
 /** Angular Imports */
-import { Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 /** Custom Components */
@@ -12,7 +12,8 @@ import { LoanProductAccountingStepComponent } from '../loan-product-stepper/loan
 
 /** Custom Services */
 import { ProductsService } from 'app/products/products.service';
-import { SettingsService } from 'app/settings/settings.service';
+import { GlobalConfiguration } from 'app/system/configurations/global-configurations-tab/configuration.model';
+import { LoanProducts } from '../loan-products';
 
 @Component({
   selector: 'mifosx-create-loan-product',
@@ -30,28 +31,32 @@ export class CreateLoanProductComponent implements OnInit {
 
   loanProductsTemplate: any;
   accountingRuleData = ['None', 'Cash', 'Accrual (periodic)', 'Accrual (upfront)'];
+  itemsByDefault: any[] = [];
 
    /**
     * @param {ActivatedRoute} route Activated Route.
     * @param {ProductsService} productsService Product Service.
-    * @param {SettingsService} settingsService Settings Service
+    * @param {LoanProducts} loanProducts LoanProducts
     * @param {Router} router Router for navigation.
     */
 
   constructor(private route: ActivatedRoute,
               private productsService: ProductsService,
-              private settingsService: SettingsService,
+              private loanProducts: LoanProducts,
               private router: Router) {
-    this.route.data.subscribe((data: { loanProductsTemplate: any }) => {
+    this.route.data.subscribe((data: { loanProductsTemplate: any, configurations: any }) => {
       this.loanProductsTemplate = data.loanProductsTemplate;
       const assetAccountData = this.loanProductsTemplate.accountingMappingOptions.assetAccountOptions || [];
       const liabilityAccountData = this.loanProductsTemplate.accountingMappingOptions.liabilityAccountOptions || [];
       this.loanProductsTemplate.accountingMappingOptions.assetAndLiabilityAccountOptions = assetAccountData.concat(liabilityAccountData);
+
+      this.itemsByDefault = loanProducts.setItemsByDefault(data.configurations);
+      this.loanProductsTemplate['itemsByDefault'] = this.itemsByDefault;
+      this.loanProductsTemplate = loanProducts.updateLoanProductDefaults(this.loanProductsTemplate, false);
     });
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
 
   get loanProductDetailsForm() {
     return this.loanProductDetailsStep.loanProductDetailsForm;
@@ -95,15 +100,7 @@ export class CreateLoanProductComponent implements OnInit {
   }
 
   submit() {
-    const dateFormat = this.settingsService.dateFormat;
-    const loanProduct = {
-      ...this.loanProduct,
-      charges: this.loanProduct.charges.map((charge: any) => ({ id: charge.id })),
-      dateFormat,
-      locale: this.settingsService.language.code
-    };
-    delete loanProduct.allowAttributeConfiguration;
-    delete loanProduct.advancedAccountingRules;
+    const loanProduct = this.loanProducts.buildPayload(this.loanProduct, this.itemsByDefault);
 
     this.productsService.createLoanProduct(loanProduct)
       .subscribe((response: any) => {

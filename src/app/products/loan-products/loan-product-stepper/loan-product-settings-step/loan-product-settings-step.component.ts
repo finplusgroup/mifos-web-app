@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { LoanProducts } from '../../loan-products';
 
 @Component({
   selector: 'mifosx-loan-product-settings-step',
@@ -28,7 +29,8 @@ export class LoanProductSettingsStepComponent implements OnInit {
   interestRecalculationOnDayTypeData: any;
   delinquencyBucketData: any;
 
-  constructor(private formBuilder: FormBuilder) {
+  constructor(private formBuilder: FormBuilder,
+    private loanProducts: LoanProducts) {
     this.createLoanProductSettingsForm();
     this.setConditionalControls();
   }
@@ -86,6 +88,8 @@ export class LoanProductSettingsStepComponent implements OnInit {
       'multiDisburseLoan': this.loanProductsTemplate.multiDisburseLoan,
       'maxTrancheCount': this.loanProductsTemplate.maxTrancheCount,
       'outstandingLoanBalance': this.loanProductsTemplate.outstandingLoanBalance,
+      'dueDaysForRepaymentEvent': this.loanProductsTemplate.dueDaysForRepaymentEvent,
+      'overDueDaysForRepaymentEvent': this.loanProductsTemplate.overDueDaysForRepaymentEvent
     });
 
     if (this.loanProductsTemplate.delinquencyBucket) {
@@ -181,7 +185,9 @@ export class LoanProductSettingsStepComponent implements OnInit {
         'graceOnPrincipalAndInterestPayment': [true],
         'graceOnArrearsAgeing': [true]
       }),
-      'delinquencyBucketId': ['', Validators.required]
+      'delinquencyBucketId': ['', Validators.required],
+      'dueDaysForRepaymentEvent': [''],
+      'overDueDaysForRepaymentEvent': ['']
     });
   }
 
@@ -191,7 +197,7 @@ export class LoanProductSettingsStepComponent implements OnInit {
     this.loanProductSettingsForm.get('interestCalculationPeriodType').valueChanges
       .subscribe((interestCalculationPeriodType: any) => {
         if (interestCalculationPeriodType === 0) {
-          this.loanProductSettingsForm.patchValue({'allowPartialPeriodInterestCalcualtion': false});
+          this.loanProductSettingsForm.patchValue({ 'allowPartialPeriodInterestCalcualtion': false });
         }
       });
 
@@ -352,6 +358,13 @@ export class LoanProductSettingsStepComponent implements OnInit {
           });
         }
       });
+  }
+
+  styleByDefault(input: string): string {
+    if (this.loanProducts.isItemByDefault(input)) {
+      return 'by-default';
+    }
+    return '';
   }
 
   get loanProductSettings() {
